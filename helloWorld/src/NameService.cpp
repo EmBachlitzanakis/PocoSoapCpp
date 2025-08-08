@@ -47,8 +47,8 @@ public:
             
             _session = new Poco::Data::Session("ODBC", connectionString);
             return true;
-        } catch (const DataException& e) {
-            cerr << "Database connection error: " << e.displayText() << endl;
+        } catch (...) {
+            cerr << "Database connection error: \n" ;
             return false;
         }
     }
