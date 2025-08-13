@@ -46,12 +46,63 @@ public:
                 "PWD=db2admin1;";
             
             _session = new Poco::Data::Session("ODBC", connectionString);
+            _session->setFeature("autoCommit", false); 
             return true;
         } catch (...) {
             cerr << "Database connection error: \n" ;
             return false;
         }
     }
+
+    bool BeginTransaction() {
+    if (m_session && m_session->isConnected()) {
+        try {
+            // Poco's autocommit=false handles the transaction beginning implicitly.
+            // You can, however, use a specific SQL command if needed.
+            // For most use cases, just performing the first database operation will start it.
+            std::cout << "Transaction began." << std::endl;
+            return true;
+        } catch (const Poco::Exception& ex) {
+            m_errorMessage = "ERR_BEGIN_TRANSACTION: " + ex.message();
+            std::cerr << m_errorMessage << std::endl;
+            return false;
+        }
+    }
+    return false;
+    }
+
+    bool CommitTransaction() {
+    if (m_session && m_session->isConnected()) {
+        try {
+            // Commit the transaction and save all changes
+            m_session->commit();
+            std::cout << "Transaction committed successfully!" << std::endl;
+            return true;
+        } catch (const Poco::Exception& ex) {
+            m_errorMessage = "ERR_COMMIT_TRANSACTION: " + ex.message();
+            std::cerr << m_errorMessage << std::endl;
+            return false;
+        }
+    }
+    return false;
+    }
+
+    bool RollbackTransaction() {
+    if (m_session && m_session->isConnected()) {
+        try {
+            // Rollback the transaction and undo all changes
+            m_session->rollback();
+            std::cout << "Transaction rolled back!" << std::endl;
+            return true;
+        } catch (const Poco::Exception& ex) {
+            m_errorMessage = "ERR_ROLLBACK_TRANSACTION: " + ex.message();
+            std::cerr << m_errorMessage << std::endl;
+            return false;
+        }
+    }
+    return false;
+    }
+
     
     // Fetches the full name for a given first name
     string getFullName(const string& firstName) {
@@ -169,6 +220,10 @@ void NameRequestHandler::handleRequest(HTTPServerRequest& request, HTTPServerRes
         dbService.disconnect();
         sendSoapFault(response, HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, "Server.DatabaseError", DB_QUERY_FAILED_MSG);
         return;
+    }
+    
+    if (!CommitTransaction()){
+           auto Rollback =  RollbackTransaction();
     }
     dbService.disconnect();
 
