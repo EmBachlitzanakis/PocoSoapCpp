@@ -12,18 +12,18 @@ find_package(Poco REQUIRED Foundation XML Net)
 
 # Add executable
 add_executable(soap_service 
-    src/main.cpp
-    src/NameService.hpp
-    src/NameService.cpp
+    main.cpp
+    NameService.hpp
+    NameService.cpp
 )
 #second approach to add executable
 # set(HEADERS
-#     src/NameService.hpp
+#     NameService.hpp
 # )
 
 # set(SOURCES
-#     src/main.cpp
-#     src/NameService.cpp
+#     main.cpp
+#     NameService.cpp
 # )
 
 # add_executable(soap_service 
